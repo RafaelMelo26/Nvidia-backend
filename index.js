@@ -21,8 +21,10 @@ mongoose.connect(
   `mongodb+srv://admin:${process.env.DB_PASSWORD}@cluster0.rruvhkl.mongodb.net/?retryWrites=true&w=majority`,
   { useNewUrlParser: true, useUnifiedTopology: true }
 );
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
+mongoose.connection.on(
+  "error",
+  console.error.bind(console, "MongoDB connection error:")
+);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

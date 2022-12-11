@@ -9,13 +9,11 @@ router.post("/cadastro", async (req, res) => {
   const password = req.body.password;
 
   if (!email || !password == null) {
-    return res.status(403).json("Missing some fields");
+    return res.status(403).json({ error: "Campo(s) não preenchido(s)" });
   }
 
-  const userAlreadyExists = await User.findOne({ email }).exec();
-
-  if (userAlreadyExists) {
-    return res.status(403).json({ error: "User already registered" });
+  if (await User.findOne({ email }).exec()) {
+    return res.status(403).json({ error: "Usuário jà cadastrado" });
   }
 
   const newUser = new User({
@@ -23,25 +21,27 @@ router.post("/cadastro", async (req, res) => {
     password: bcrypt.hashSync(password, 8),
   });
 
-  newUser.save();
+  const user = await newUser.save();
 
-  res.status(200).json({ msg: "Registered with success" });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+
+  res.status(200).json({ msg: "Cadastrado com sucesso", token });
 });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(403).json({ error: "Missing some fields" });
+    return res.status(403).json({ error: "Campo(s) não preenchido(s)" });
   }
 
   const user = await User.findOne({ email }).exec();
 
   if (!user) {
-    return res.status(403).json({ error: "User do not exists" });
+    return res.status(403).json({ error: "Usuário inválido" });
   }
 
   if (!bcrypt.compareSync(password, user.password)) {
-    return res.status(403).json({ error: "Invalid credentials" });
+    return res.status(403).json({ error: "Senha inválida" });
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);

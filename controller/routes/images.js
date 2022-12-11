@@ -10,18 +10,18 @@ var jwt = require("jsonwebtoken");
 router.get("/", async (req, res) => {
   const token = req.headers.token;
   if (!token) {
-    return res.status(400).json({ error: "Not authenticated" });
+    return res.status(400).json("Não autenticado");
   }
 
   try {
     jwt.verify(token, process.env.JWT_SECRET_KEY);
   } catch (err) {
-    return res.status(400).json({ error: "Not authenticated" });
+    return res.status(400).json("Não autenticado");
   }
 
   const name = req.query.name;
   if (!name) {
-    return res.status(400).json({ msg: "Name not provided" });
+    return res.status(400).json("Nome inválido");
   }
 
   const Images = await Image.find({
@@ -29,9 +29,7 @@ router.get("/", async (req, res) => {
   }).exec();
 
   if (!Images) {
-    return res
-      .status(400)
-      .json({ error: "No Images were found with this name" });
+    return res.status(400).json("Não existem imagens com esse nome");
   }
 
   res.status(200).json(Images);
@@ -40,13 +38,13 @@ router.get("/", async (req, res) => {
 router.post("/", upload.single("url"), (req, res) => {
   const token = req.headers.token;
   if (!token) {
-    return res.status(400).json({ error: "Not authenticated" });
+    return res.status(400).json("Não autenticado");
   }
 
   try {
     jwt.verify(token, process.env.JWT_SECRET_KEY);
   } catch (err) {
-    return res.status(400).json({ error: "Not authenticated" });
+    return res.status(400).json("Não autenticado");
   }
 
   fetch(`${process.env.URL_KEY}`, {
@@ -64,10 +62,10 @@ router.post("/", upload.single("url"), (req, res) => {
 
         newImage.save();
 
-        return res.status(200).json({ msg: "Created with success" });
+        return res.status(200).json("Criado com sucesso");
       },
       (err) => {
-        return res.status(500).json({ msg: "Fail to save image" });
+        return res.status(500).json("Erro ao salvar a imagem");
       }
     );
 });
